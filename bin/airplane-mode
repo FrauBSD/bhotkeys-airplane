@@ -1,0 +1,159 @@
+#!/bin/sh
+############################################################ LICENSE
+#
+# Copyright (c) 2026 Devin Teske <dteske@FreeBSD.org>
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+############################################################ IDENT(1)
+#
+# $Title: Turn airplane mode on or off $
+# $Copyright: 2026 Devin Teske. All rights reserved. $
+# $FrauBSD: bhotkeys-airplane/bin/airplane-mode 2026-10-05 14:50:25 -0700 Devin Teske $
+#
+############################################################ INFORMATION
+#
+# Talk to airplane-radiosd over its control socket. on, off, and
+# toggle show airplane-on or airplane-off with bosd.
+#
+# The intended state is written before the radios move, so a press
+# while the glyph is still up still toggles. The daemon is asked to
+# catch up to the latest on or off.
+#
+#   airplane-mode on|off|toggle|status
+#
+############################################################ ENVIRONMENT
+
+DISPLAY="${DISPLAY:-:0}"
+export DISPLAY
+
+############################################################ GLOBALS
+
+pgm="${0##*/}" # Program basename
+
+SOCK="${airplane_radiosd_socket:-/var/run/airplane-radiosd.sock}"
+
+############################################################ FUNCTIONS
+
+quietly() { "$@" > /dev/null 2>&1; }
+have() { quietly command -v "$@"; }
+
+usage()
+{
+	exec >&2
+	echo "Usage: $pgm on|off|toggle|status"
+	exit 64
+}
+
+state_file()
+{
+	local __var_to_set="$1"
+	local __dir="${HOME:-/tmp}/.cache"
+
+	mkdir -p "$__dir"
+	eval $__var_to_set=\"\$__dir/airplane-mode.state\"
+}
+
+run_radios()
+{
+	local cmd="$1"
+	local reply=
+
+	if [ ! -S "$SOCK" ]; then
+		printf "%s: %s not available %s\n" "$pgm" "$SOCK" \
+			"(is airplane-radiosd running?)" >&2
+		return 1
+	fi
+	reply=$( printf "%s\n" "$cmd" |
+		nc -U -N -w 5 "$SOCK" 2> /dev/null ) || reply=
+	reply=$( printf "%s" "$reply" | tr -d '\r' | sed -n 1p )
+	if [ "$cmd" = status ]; then
+		case "$reply" in
+		on|off)
+			printf "%s\n" "$reply"
+			return 0
+			;;
+		esac
+		echo "$pgm: status failed${reply:+ ($reply)}" >&2
+		return 1
+	fi
+	[ "$reply" = ok ] && return 0
+	echo "$pgm: $cmd failed${reply:+ ($reply)}" >&2
+	return 1
+}
+
+step_state()
+{
+	local want="$1"
+	local file= cur= new=
+
+	state_file file
+	if [ ! -s "$file" ]; then
+		cur=$( run_radios status ) || cur=off
+		case "$cur" in
+		on|off) : ok ;;
+		*) cur=off
+		esac
+		printf "%s\n" "$cur" > "$file"
+	fi
+	read cur < "$file" || cur=off
+	if [ "$want" = on ] || [ "$want" = off ]; then
+		new=$want
+	elif [ "$cur" = on ]; then
+		new=off
+	else
+		new=on
+	fi
+	printf "%s\n" "$new" > "$file"
+	printf "%s\n" "$new"
+}
+
+apply_state()
+{
+	local file= want= now=
+
+	state_file file
+	while :; do
+		read want < "$file" || exit 0
+		run_radios "$want" || : radio errors ignored
+		read now < "$file" || exit 0
+		[ "$want" = "$now" ] && break
+	done
+}
+
+############################################################ MAIN
+
+CMD="$1"
+[ "$CMD" ] || usage
+
+case "$CMD" in
+on|off|toggle|status|--step|--apply) : ok ;;
+*) usage
+esac
+
+case "$CMD" in
+status)
+	run_radios status
+	exit
+	;;
+--step)
+	step_state "$2"
+	exit 0
+	;;
+--apply)
+	apply_state
+	exit 0
+	;;
+on|off|toggle)
+	# Latest on/off wins while a glyph is still up
+	new=$( lockf -k /tmp/airplane-mode.state.lock "$0" --step "$CMD" ) ||
+		exit 0
+	have bosd && bosd "airplane-$new" 2 &
+	quietly lockf -t 0 -k /tmp/airplane-mode.apply.lock "$0" --apply &
+	exit 0
+	;;
+esac
+
+################################################################################
+# END
+################################################################################

@@ -1,0 +1,3 @@
+sbin/airplane-radiosd
+rc.d/airplane-radiosd
+man/airplane-radiosd.8

@@ -1,0 +1,158 @@
+.\" Copyright (c) 2026 Devin Teske <dteske@FreeBSD.org>
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd October 4, 2026
+.Dt AIRPLANE-RADIOSD 8
+.Os
+.Sh NAME
+.Nm airplane-radiosd
+.Nd airplane-mode radio helper
+.Sh SYNOPSIS
+.Nm Cm start
+.Nm Cm stop
+.Nm Cm status
+.Nm Cm serve
+.Nm Cm on
+.Nm Cm off
+.Sh DESCRIPTION
+.Nm
+is the root helper for airplane mode.
+The rc script starts it with
+.Cm serve .
+It does not change the radios at boot.
+It listens on a Unix socket so a session can turn them off or on
+without becoming root.
+.Pp
+The socket is mode 0660 and group
+.Cm airplane_radiosd .
+The rc script creates that group when it is missing.
+The daemon refuses to listen when the group is missing.
+Add the session account to the group, then log in again so the
+new group is in the credentials:
+.Bd -literal -offset indent
+pw groupmod airplane_radiosd -m user
+.Ed
+.Pp
+.Cm on
+turns airplane mode on.
+Bluetooth is stopped for
+.Cm ubt0
+through
+.Cm ubt3 ,
+.Xr ng_ubt 4
+is unloaded, and
+.Ev airplane_radiosd_wlan
+is marked down.
+.Cm off
+loads
+.Xr ng_ubt 4 ,
+runs
+.Xr iwmbtfw 8
+for Intel USB controllers
+.Pq vendor 0x8087 ,
+starts those Bluetooth units, and marks the WLAN interface up.
+.Cm status
+prints whether the daemon is running and whether airplane mode
+is
+.Cm on
+or
+.Cm off .
+Airplane mode is
+.Cm on
+when that WLAN interface is not up.
+A missing interface counts as down.
+.Pp
+.Ev airplane_radiosd_wlan
+is one interface name.
+The rc script fills an empty value with
+.Cm wlan0 .
+Run without the rc script, an empty
+.Ev airplane_radiosd_wlan
+uses
+.Ev AIRPLANE_WLAN ,
+and an empty
+.Ev AIRPLANE_WLAN
+uses
+.Cm wlan0 .
+.Pp
+.Cm on
+and
+.Cm off
+on the command line require the super-user and act directly.
+The session uses the socket.
+One command per connection, one line back:
+.Bl -tag -width "status"
+.It Cm on
+Airplane mode on.
+Reply
+.Cm ok ,
+or
+.Cm error :
+and a reason.
+.It Cm off
+Airplane mode off.
+Same replies as
+.Cm on .
+.It Cm status
+Reply
+.Cm on
+or
+.Cm off .
+.It Cm quit
+Reply
+.Cm bye
+and exit.
+.El
+.Pp
+Enable the service with:
+.Pp
+.Dl sysrc airplane_radiosd_enable=YES
+.Pp
+Start it with:
+.Pp
+.Dl service airplane_radiosd start
+.Sh ENVIRONMENT
+.Bl -tag -width "airplane_radiosd_socket"
+.It Ev airplane_radiosd_wlan
+WLAN interface name.
+The rc default is
+.Cm wlan0 .
+.It Ev AIRPLANE_WLAN
+Used when
+.Ev airplane_radiosd_wlan
+is empty and the daemon is not started by the rc script.
+.It Ev airplane_radiosd_socket
+Control socket.
+The default is
+.Pa /var/run/airplane-radiosd.sock .
+.It Ev airplane_radiosd_group
+Socket group.
+The default is
+.Cm airplane_radiosd .
+.El
+.Sh FILES
+.Bl -tag -width "@PREFIX@/etc/rc.d/airplane-radiosd"
+.It Pa @PREFIX@/etc/rc.d/airplane-radiosd
+The rc script.
+.It Pa @PREFIX@/sbin/airplane-radiosd
+The daemon.
+.It Pa /var/run/airplane-radiosd.sock
+The control socket.
+.It Pa /var/run/airplane-radiosd.pid
+The process id.
+.El
+.Sh EXIT STATUS
+.Cm serve
+runs until
+.Cm quit
+or a signal.
+A missing group, a name that does not fit in an interface name,
+or a failure to bind the socket exits non-zero.
+.Sh SEE ALSO
+.Xr airplane-mode 1 ,
+.Xr bhotkeys 1 ,
+.Xr ng_ubt 4 ,
+.Xr iwmbtfw 8
+.Sh AUTHORS
+.An Devin Teske Aq Mt dteske@FreeBSD.org

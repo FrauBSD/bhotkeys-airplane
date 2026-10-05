@@ -1,0 +1,105 @@
+.\" Copyright (c) 2026 Devin Teske <dteske@FreeBSD.org>
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd October 5, 2026
+.Dt AIRPLANE-MODE 1
+.Os
+.Sh NAME
+.Nm airplane-mode
+.Nd turn airplane mode on or off
+.Sh SYNOPSIS
+.Nm Cm on
+.Nm Cm off
+.Nm Cm toggle
+.Nm Cm status
+.Sh DESCRIPTION
+.Nm
+asks
+.Xr airplane-radiosd 8
+to turn the WLAN interface and Bluetooth off
+.Pq Cm on
+or back on
+.Pq Cm off ,
+then shows
+.Cm airplane-on
+or
+.Cm airplane-off
+through
+.Xr bosd 1
+for 2 seconds.
+.Cm toggle
+flips the intended state.
+.Cm status
+prints
+.Cm on
+or
+.Cm off
+and does not show a glyph.
+.Pp
+The intended state is written to
+.Pa ~/.cache/airplane-mode.state
+before the radios move.
+A press while the glyph is still up still toggles, and the daemon
+is asked to catch up to the latest
+.Cm on
+or
+.Cm off .
+.Pp
+The socket is
+.Ev airplane_radiosd_socket ,
+or
+.Pa /var/run/airplane-radiosd.sock
+when that is unset.
+If the socket is missing,
+.Nm
+reports that and does not change the radios.
+.Sh ENVIRONMENT
+.Bl -tag -width "airplane_radiosd_socket"
+.It Ev airplane_radiosd_socket
+Control socket.
+The default is
+.Pa /var/run/airplane-radiosd.sock .
+.It Ev DISPLAY
+X server for
+.Nm bosd .
+The default is
+.Pa :0 .
+.It Ev HOME
+Directory above
+.Pa .cache/airplane-mode.state .
+When unset, the state file is under
+.Pa /tmp .
+.El
+.Sh FILES
+.Bl -tag -width "~/.cache/airplane-mode.state"
+.It Pa ~/.cache/airplane-mode.state
+Intended airplane state,
+.Cm on
+or
+.Cm off .
+.It Pa /tmp/airplane-mode.state.lock
+Lock around the state flip.
+.It Pa /tmp/airplane-mode.apply.lock
+Lock around the request to the daemon.
+.El
+.Sh EXIT STATUS
+.Cm on ,
+.Cm off ,
+and
+.Cm toggle
+exit 0 once the request is queued.
+.Cm status
+exits 0 when the daemon replies
+.Cm on
+or
+.Cm off ,
+and 1 otherwise.
+A bad argument exits 64.
+.Sh SEE ALSO
+.Xr airplane-mode-toggle 1 ,
+.Xr bhotkeys 1 ,
+.Xr bosd 1 ,
+.Xr airplane-radiosd 8
+.Sh AUTHORS
+.An Devin Teske Aq Mt dteske@FreeBSD.org

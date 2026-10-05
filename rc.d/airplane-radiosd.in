@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+# PROVIDE: airplane_radiosd
+# REQUIRE: FILESYSTEMS NETWORKING
+# KEYWORD: nojail shutdown
+#
+# Serves a Unix socket so a session can turn WLAN and Bluetooth
+# off or on without becoming root.
+#
+# Enable in /etc/rc.conf:
+#	airplane_radiosd_enable="YES"
+#
+# Optional:
+#	airplane_radiosd_wlan="wlan0"
+#	airplane_radiosd_socket="/var/run/airplane-radiosd.sock"
+#	airplane_radiosd_group="airplane_radiosd"
+#	airplane_radiosd_flags=""
+#
+
+. /etc/rc.subr
+
+name=airplane_radiosd
+rcvar=airplane_radiosd_enable
+desc="Airplane-mode radio helper"
+
+load_rc_config $name
+
+: "${airplane_radiosd_enable:=NO}"
+: "${airplane_radiosd_wlan:=wlan0}"
+: "${airplane_radiosd_socket:=/var/run/airplane-radiosd.sock}"
+: "${airplane_radiosd_group:=airplane_radiosd}"
+
+command="@PREFIX@/sbin/airplane-radiosd"
+pidfile="/var/run/airplane-radiosd.pid"
+command_args="start"
+start_cmd="airplane_radiosd_start"
+stop_cmd="airplane_radiosd_stop"
+status_cmd="airplane_radiosd_status"
+
+airplane_radiosd_start()
+{
+	[ -x "$command" ] || err 1 "$command not installed"
+	pw groupshow "$airplane_radiosd_group" > /dev/null 2>&1 ||
+		pw groupadd "$airplane_radiosd_group"
+	export airplane_radiosd_wlan
+	export airplane_radiosd_socket
+	export airplane_radiosd_group
+	/usr/sbin/daemon -f -p "$pidfile" "$command" serve
+}
+
+airplane_radiosd_stop()
+{
+	if [ -f "$pidfile" ]; then
+		kill "$(cat "$pidfile")" 2> /dev/null || : errors ignored
+		rm -f "$pidfile"
+	fi
+	rm -f "$airplane_radiosd_socket"
+	if [ -x "$command" ]; then
+		airplane_radiosd_socket="$airplane_radiosd_socket" "$command" \
+			stop || : errors ignored
+	fi
+}
+
+airplane_radiosd_status()
+{
+	if [ -x "$command" ]; then
+		airplane_radiosd_socket="$airplane_radiosd_socket" "$command" \
+			status
+	else
+		echo "$command not installed"
+		return 1
+	fi
+}
+
+run_rc_command "$1"

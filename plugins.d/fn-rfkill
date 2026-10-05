@@ -1,0 +1,8 @@
+id fn-rfkill
+group x11/bhotkeys-airplane
+label Radio kill
+chord XF86RFKill
+command airplane-mode-toggle
+repeat 0
+greeter 1
+desc Fn+F10. Hardware name XF86RFKill, from hrfkill. Same airplane toggle as Super+A. Disable one if a single press toggles twice.
