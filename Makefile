@@ -8,7 +8,7 @@
 #
 # $Title: bhotkeys-airplane - radio kill $
 # $Copyright: 2026 Devin Teske. All rights reserved. $
-# $FrauBSD: bhotkeys-airplane/Makefile 2026-10-05 14:50:25 -0700 Devin Teske $
+# $FrauBSD: bhotkeys-airplane/Makefile 2026-10-05 18:44:10 -0700 Devin Teske $
 #
 ############################################################ PATHS
 
@@ -28,11 +28,11 @@ CFLAGS?=	-O2 -Wall -Wextra
 ############################################################ FILES
 
 # airplane-radiosd serves the socket airplane-mode uses.
-BIN=		bin/airplane-mode bin/airplane-mode-toggle
+BIN=		bin/airplane-mode
 SBIN=		sbin/airplane-radiosd
 RC=		rc.d/airplane-radiosd
 PLUG=		plugins.d/fn-airplane plugins.d/fn-rfkill
-MAN1=		airplane-mode airplane-mode-toggle
+MAN1=		airplane-mode
 MAN8=		airplane-radiosd
 
 ############################################################ TARGETS

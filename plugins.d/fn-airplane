@@ -3,7 +3,7 @@ group x11/bhotkeys-airplane
 label Airplane mode
 chord Super+a
 chord Super+w kde gnome
-command airplane-mode-toggle
+command airplane-mode toggle
 repeat 0
 greeter 1
 desc Radios off or on. Same action as Radio kill.

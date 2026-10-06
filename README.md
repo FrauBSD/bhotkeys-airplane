@@ -1,4 +1,4 @@
-[//]: # ($FrauBSD: bhotkeys-airplane/README.md 2026-10-05 14:50:25 -0700 Devin Teske $)
+[//]: # ($FrauBSD: bhotkeys-airplane/README.md 2026-10-05 18:44:10 -0700 Devin Teske $)
 
 # bhotkeys-airplane
 
@@ -46,7 +46,7 @@ group is in the credentials:
 pw groupmod airplane_radiosd -m user
 ```
 
-Installs `airplane-mode` and `airplane-mode-toggle` into
+Installs `airplane-mode` into
 `${PREFIX}/bin`, `airplane-radiosd` into
 `${PREFIX}/sbin`, its rc script into `${PREFIX}/etc/rc.d`, and
 `fn-airplane` and `fn-rfkill` into
