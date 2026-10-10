@@ -40,8 +40,6 @@ status_cmd="airplane_radiosd_status"
 airplane_radiosd_start()
 {
 	[ -x "$command" ] || err 1 "$command not installed"
-	pw groupshow "$airplane_radiosd_group" > /dev/null 2>&1 ||
-		pw groupadd "$airplane_radiosd_group"
 	export airplane_radiosd_wlan
 	export airplane_radiosd_socket
 	export airplane_radiosd_group

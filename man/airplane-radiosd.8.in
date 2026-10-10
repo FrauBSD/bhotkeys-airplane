@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd October 4, 2026
+.Dd October 10, 2026
 .Dt AIRPLANE-RADIOSD 8
 .Os
 .Sh NAME
@@ -26,7 +26,7 @@ without becoming root.
 .Pp
 The socket is mode 0660 and group
 .Cm airplane_radiosd .
-The rc script creates that group when it is missing.
+The package creates that group.
 The daemon refuses to listen when the group is missing.
 Add the session account to the group, then log in again so the
 new group is in the credentials:
@@ -130,6 +130,8 @@ The default is
 Socket group.
 The default is
 .Cm airplane_radiosd .
+The package creates that group.
+Any other name must already exist.
 .El
 .Sh FILES
 .Bl -tag -width "@PREFIX@/etc/rc.d/airplane-radiosd"

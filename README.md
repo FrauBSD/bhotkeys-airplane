@@ -1,4 +1,4 @@
-[//]: # ($FrauBSD: bhotkeys-airplane/README.md 2026-10-05 18:44:10 -0700 Devin Teske $)
+[//]: # ($FrauBSD: bhotkeys-airplane/README.md 2026-10-10 08:17:52 -0700 Devin Teske $)
 
 # bhotkeys-airplane
 
@@ -38,7 +38,7 @@ Optional `rc.conf` settings: `airplane_radiosd_wlan` (default
 `wlan0`), `airplane_radiosd_socket`, and `airplane_radiosd_group`
 (default `airplane_radiosd`).
 
-The socket is mode 0660 and that group. The service creates the
+The socket is mode 0660 and that group. The package creates the
 group. Add the session account, then log in again so the new
 group is in the credentials:
 
