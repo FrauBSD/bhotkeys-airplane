@@ -111,7 +111,7 @@ Enable the service with:
 .Pp
 Start it with:
 .Pp
-.Dl service airplane_radiosd start
+.Dl service airplane-radiosd start
 .Sh ENVIRONMENT
 .Bl -tag -width "airplane_radiosd_socket"
 .It Ev airplane_radiosd_wlan

@@ -1,4 +1,4 @@
-[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-10 08:17:52 -0700 Devin Teske $)
+[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-10 08:20:55 -0700 Devin Teske $)
 
 # Changelog
 
@@ -10,6 +10,7 @@ repository for 1.0).
 
 - installing the package creates group `airplane_radiosd`; the rc
   script no longer creates it
+- Fix service command typo in airplane-radiosd(8)
 
 ## 1.1 (2026-10-05)
 
