@@ -1,10 +1,14 @@
-[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-10 08:20:55 -0700 Devin Teske $)
+[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-17 11:13:57 -0700 unknown $)
 
 # Changelog
 
 Newest first. Each section is a git tag; the bullets are what landed
 in that tag (from the previous tag, or from the start of the
 repository for 1.0).
+
+## 1.2.1 (2026-10-17)
+
+- Provide OSD feedback to user when airplane-radiosd service is not running
 
 ## 1.2 (2026-10-10)
 

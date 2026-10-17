@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd October 5, 2026
+.Dd October 17, 2026
 .Dt AIRPLANE-MODE 1
 .Os
 .Sh NAME
@@ -37,7 +37,12 @@ or
 .Cm off
 and does not show a glyph.
 .Pp
-The intended state is written to
+The socket is
+.Ev airplane_radiosd_socket ,
+or
+.Pa /var/run/airplane-radiosd.sock
+when that is unset.
+When it is present, the intended state is written to
 .Pa ~/.cache/airplane-mode.state
 before the radios move.
 A press while the glyph is still up still toggles, and the daemon
@@ -46,14 +51,14 @@ is asked to catch up to the latest
 or
 .Cm off .
 .Pp
-The socket is
-.Ev airplane_radiosd_socket ,
-or
-.Pa /var/run/airplane-radiosd.sock
-when that is unset.
 If the socket is missing,
 .Nm
-reports that and does not change the radios.
+reports that, shows a red caption through
+.Xr bosd 1
+that
+.Nm airplane-radiosd
+is not running, and does not change the radios
+or the intended state.
 .Sh ENVIRONMENT
 .Bl -tag -width "airplane_radiosd_socket"
 .It Ev airplane_radiosd_socket
@@ -88,7 +93,8 @@ Lock around the request to the daemon.
 .Cm off ,
 and
 .Cm toggle
-exit 0 once the request is queued.
+exit 0 once the request is queued,
+and 1 when the socket is missing.
 .Cm status
 exits 0 when the daemon replies
 .Cm on

@@ -9,7 +9,7 @@
 #
 # $Title: Turn airplane mode on or off $
 # $Copyright: 2026 Devin Teske. All rights reserved. $
-# $FrauBSD: bhotkeys-airplane/bin/airplane-mode 2026-10-05 14:50:25 -0700 Devin Teske $
+# $FrauBSD: bhotkeys-airplane/bin/airplane-mode 2026-10-17 11:13:57 -0700 unknown $
 #
 ############################################################ INFORMATION
 #
@@ -20,18 +20,21 @@
 # while the glyph is still up still toggles. The daemon is asked to
 # catch up to the latest on or off.
 #
+# When the socket is missing, a red caption says airplane-radiosd is
+# not running. The intended state is left alone.
+#
 #   airplane-mode on|off|toggle|status
 #
 ############################################################ ENVIRONMENT
 
-DISPLAY="${DISPLAY:-:0}"
-export DISPLAY
+SOCK="${airplane_radiosd_socket:-/var/run/airplane-radiosd.sock}"
 
 ############################################################ GLOBALS
 
 pgm="${0##*/}" # Program basename
 
-SOCK="${airplane_radiosd_socket:-/var/run/airplane-radiosd.sock}"
+WARN='airplane-radiosd\x20is\x20not\x20running;\x20see\x20airplane-radiosd(8)'
+WARN_COLOR="#cb1008" # FreeBSD Red
 
 ############################################################ FUNCTIONS
 
@@ -43,6 +46,13 @@ usage()
 	exec >&2
 	echo "Usage: $pgm on|off|toggle|status"
 	exit 64
+}
+
+# Red caption when airplane-radiosd is not listening
+service_missing()
+{
+	have bosd || return 0
+	bosd -F "$WARN_COLOR" -t "$WARN" 2 &
 }
 
 state_file()
@@ -145,6 +155,12 @@ status)
 	exit 0
 	;;
 on|off|toggle)
+	if [ ! -S "$SOCK" ]; then
+		printf "%s: %s not available %s\n" "$pgm" "$SOCK" \
+			"(is airplane-radiosd running?)" >&2
+		service_missing
+		exit 1
+	fi
 	# Latest on/off wins while a glyph is still up
 	new=$( lockf -k /tmp/airplane-mode.state.lock "$0" --step "$CMD" ) ||
 		exit 0
