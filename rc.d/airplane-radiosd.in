@@ -49,7 +49,7 @@ airplane_radiosd_start()
 airplane_radiosd_stop()
 {
 	if [ -f "$pidfile" ]; then
-		kill "$(cat "$pidfile")" 2> /dev/null || : errors ignored
+		kill "$( cat "$pidfile" )" 2> /dev/null || : errors ignored
 		rm -f "$pidfile"
 	fi
 	rm -f "$airplane_radiosd_socket"

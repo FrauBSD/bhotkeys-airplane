@@ -1,4 +1,4 @@
-[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-18 05:09:52 -0700 Devin Teske $)
+[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-18 05:11:48 -0700 Devin Teske $)
 
 # Changelog
 
@@ -10,6 +10,7 @@ repository for 1.0).
 
 - Provide OSD feedback to user when airplane-radiosd service is not running
 - Provide OSD feedback to user when airplane-radiosd socket is unwritable
+- Adjust whitespace in rc.d/airplane-radiosd[.in]
 
 ## 1.2 (2026-10-10)
 
