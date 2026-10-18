@@ -469,7 +469,11 @@ cmd_status_svc(void)
 	char cur[64];
 
 	pid = read_pid();
-	if (pid > 1 && kill(pid, 0) == 0)
+	/*
+	 * kill(pid, 0) returns EPERM when the process exists and the caller
+	 * may not signal it. Status only asks whether it exists.
+	 */
+	if (pid > 1 && (kill(pid, 0) == 0 || errno == EPERM))
 		printf("airplane-radiosd is running as pid %d.\n", pid);
 	else
 		printf("airplane-radiosd is not running.\n");
