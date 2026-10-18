@@ -1,4 +1,4 @@
-[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-17 11:13:57 -0700 unknown $)
+[//]: # ($FrauBSD: bhotkeys-airplane/CHANGELOG.md 2026-10-18 05:09:52 -0700 Devin Teske $)
 
 # Changelog
 
@@ -9,6 +9,7 @@ repository for 1.0).
 ## 1.2.1 (2026-10-17)
 
 - Provide OSD feedback to user when airplane-radiosd service is not running
+- Provide OSD feedback to user when airplane-radiosd socket is unwritable
 
 ## 1.2 (2026-10-10)
 

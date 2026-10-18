@@ -9,7 +9,7 @@
 #
 # $Title: Turn airplane mode on or off $
 # $Copyright: 2026 Devin Teske. All rights reserved. $
-# $FrauBSD: bhotkeys-airplane/bin/airplane-mode 2026-10-17 11:13:57 -0700 unknown $
+# $FrauBSD: bhotkeys-airplane/bin/airplane-mode 2026-10-18 05:09:52 -0700 Devin Teske $
 #
 ############################################################ INFORMATION
 #
@@ -21,7 +21,8 @@
 # catch up to the latest on or off.
 #
 # When the socket is missing, a red caption says airplane-radiosd is
-# not running. The intended state is left alone.
+# not running. An unwritable socket shows a red caption for that.
+# The intended state is left alone. status shows neither.
 #
 #   airplane-mode on|off|toggle|status
 #
@@ -33,7 +34,10 @@ SOCK="${airplane_radiosd_socket:-/var/run/airplane-radiosd.sock}"
 
 pgm="${0##*/}" # Program basename
 
-WARN='airplane-radiosd\x20is\x20not\x20running;\x20see\x20airplane-radiosd(8)'
+WARN_XREF=';\x20see\x20airplane-radiosd(8)'
+WARN_SERV='airplane-radiosd\x20is\x20not\x20running'"$WARN_XREF"
+WARN_PERM='airplane-radiosd\x20socket\x20is\x20not\x20writable'"$WARN_XREF"
+
 WARN_COLOR="#cb1008" # FreeBSD Red
 
 ############################################################ FUNCTIONS
@@ -52,7 +56,14 @@ usage()
 service_missing()
 {
 	have bosd || return 0
-	bosd -F "$WARN_COLOR" -t "$WARN" 2 &
+	bosd -F "$WARN_COLOR" -t "$WARN_SERV" 2 &
+}
+
+# Red caption when the socket exists but is not writable
+socket_unwritable()
+{
+	have bosd || return 0
+	bosd -F "$WARN_COLOR" -t "$WARN_PERM" 2 &
 }
 
 state_file()
@@ -72,6 +83,10 @@ run_radios()
 	if [ ! -S "$SOCK" ]; then
 		printf "%s: %s not available %s\n" "$pgm" "$SOCK" \
 			"(is airplane-radiosd running?)" >&2
+		return 1
+	fi
+	if [ ! -w "$SOCK" ]; then
+		printf "%s: %s not writable\n" "$pgm" "$SOCK" >&2
 		return 1
 	fi
 	reply=$( printf "%s\n" "$cmd" |
@@ -159,6 +174,11 @@ on|off|toggle)
 		printf "%s: %s not available %s\n" "$pgm" "$SOCK" \
 			"(is airplane-radiosd running?)" >&2
 		service_missing
+		exit 1
+	fi
+	if [ ! -w "$SOCK" ]; then
+		printf "%s: %s not writable\n" "$pgm" "$SOCK" >&2
+		socket_unwritable
 		exit 1
 	fi
 	# Latest on/off wins while a glyph is still up
