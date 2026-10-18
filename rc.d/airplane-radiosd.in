@@ -43,6 +43,12 @@ airplane_radiosd_start()
 	export airplane_radiosd_wlan
 	export airplane_radiosd_socket
 	export airplane_radiosd_group
+
+	# pidfile_open() in daemon(8) uses mode 0600 only when creating the
+	# file. Pre-create $pidfile 0644 so service status can read the pid
+	[ -f "$pidfile" ] || :> "$pidfile" || err 1 "cannot create $pidfile"
+	chmod 0644 "$pidfile" || err 1 "chmod $pidfile"
+
 	/usr/sbin/daemon -f -p "$pidfile" "$command" serve
 }
 
